@@ -29,8 +29,10 @@ TODO: add more
 
 One thing worth mentioning is that most research are done on predicting variables other than useful counts (ratings, conditions, etc). We are, in this sense, in deed groundbreaking! (jk).
 
-data source: <https://archive-beta.ics.uci.edu/ml/datasets/drug+review+dataset+drugs+com>
+data source: <https://archive-beta.ics.uci.edu/ml/datasets/drug+review+dataset+drugs+com>  
+
 related tutorials: <https://medium.com/sfu-cspmp/draw-drug-review-analysis-work-96212ed98941>
+
 related papers: <https://www.sciencedirect.com/science/article/pii/S1665642317300561#bib0105>
 
 ## For Developer
