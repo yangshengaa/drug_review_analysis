@@ -2,6 +2,18 @@
 
 In this assignment, we use the drug review dataset to predict the useful counts of a given review.
 
+<p align="center">
+  <img src="images/review_word_cloud.png" width="350" title="Word Cloud of Drug Reviews">
+</p>
+
+## Quick Start
+
+TODO: add more functionality
+
+Download data: ```python run.py download```  
+Partition data: ```python run.py partition``` (only after downloading)
+EDA (make plots): ```python run.py eda``` (only after downloading)
+
 ## File Digestion
 
 This project contains the following four folders
@@ -22,6 +34,12 @@ This project contains the following four folders
 - eda: make some (fancy) plots
 
 **images**: stores eda images.
+
+## Packages to Install
+
+- WordCloud
+- NLTK
+- shap
 
 ## Citation
 
