@@ -25,6 +25,8 @@ from src.eda.visualize import (
     plot_useful_counts_groupby_condition,
     plot_useful_counts_groupby_rating,
     plot_word_cloud,
+    plot_unigram_emb,
+    plot_bigram_emb,
 
 )
 # preprocessing 
@@ -65,7 +67,9 @@ def main(targets):
         # plot_useful_counts_groupby_rating(full_df)
 
         # plots on preprocessed data
-        plot_word_cloud()
+        # plot_word_cloud()
+        # plot_unigram_emb()
+        plot_bigram_emb()
         print('EDA Complete')
 
     if 'preprocess' in targets:

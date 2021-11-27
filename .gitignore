@@ -9,8 +9,8 @@ data/dev/*
 !data/dev/.gitkeep
 data/raw/*
 !data/raw/.gitkeep
-data/preprocess/*
-!data/preprocess/.gitkeep
+data/preprocessed/*
+!data/preprocessed/.gitkeep
 
 saved_models/*
 !saved_models/.gitkeep

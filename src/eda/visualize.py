@@ -7,8 +7,8 @@ plots include:
 - ratings distribution (check)
 - count of conditions (check)
 - useful count by conditions (check)
-- word2vec t_SNE of unigram and bigrams
-- word cloud
+- word2vec t_SNE of unigram and bigrams (check)
+- word cloud (check)
 
 (Select only some of them for final reports)
 
@@ -26,21 +26,32 @@ the columns are:
 # load packages 
 import os
 import numpy as np
-import pandas as pd 
+import pandas as pd
+import random
+from collections import defaultdict
 import multiprocessing as mp 
 import matplotlib.pyplot as plt
 
 from PIL import Image
 from wordcloud import WordCloud
 
+from gensim.models import Word2Vec
+from sklearn.manifold import TSNE
+
 # specify paths 
 SAVE_IMAGE_PATH = 'images'
+SAVE_MODEL_PATH = 'saved_models'
 PREPROCESSED_FEAT_PATH = 'data/preprocessed'
+
+# plotting style 
 plt.style.use('ggplot')  # better rendering 
 
-# =======================
-# ------ plots ----------
-# =======================
+# fixed: num workers 
+MAX_WORKERS = mp.cpu_count()
+
+# ========================================
+# ------ plots on original data ----------
+# ========================================
 
 def plot_basic_stats(df: pd.DataFrame):
     """
@@ -163,12 +174,13 @@ def plot_useful_counts_groupby_rating(df: pd.DataFrame):
     # save 
     plt.savefig(os.path.join(SAVE_IMAGE_PATH, 'useful_counts_groupby_rating.png'), dpi=300)
 
+# ============================================
+# ------ plots on preprocessed data ----------
+# ============================================
 
-def plot_word_cloud():
-    """ 
-    word_cloud!
-    """
-    # read in preprocessed tokens 
+def load_full_preprocessed_tokens():
+    """ load preprocessed tokens """
+    # read in preprocessed tokens
     tokens_path_train = os.path.join(
         PREPROCESSED_FEAT_PATH, 'tokenized_reviews_train.csv')
     tokens_path_test = os.path.join(
@@ -176,6 +188,14 @@ def plot_word_cloud():
     train_tokens = pd.read_csv(tokens_path_train)
     test_tokens = pd.read_csv(tokens_path_test)
     full_tokens = pd.concat([train_tokens, test_tokens])
+    return full_tokens
+
+def plot_word_cloud():
+    """ 
+    word_cloud 
+    """
+    # read in preprocessed tokens 
+    full_tokens = load_full_preprocessed_tokens()
     text = ' '.join(str(review) for review in full_tokens['review'].to_numpy())
 
     # wordcloud
@@ -187,10 +207,11 @@ def plot_word_cloud():
         max_words=1000,
         mode="RGBA", 
         mask=pill_bottle_mask.astype(np.int32),
-        width=3000,
+        width=500,
         height=2000,
         colormap='Set2'  # TODO: want a better colormap, maybe ...
-    )
+    )  
+    # TODO: for some reason I am not able to set the figure size of the wordcloud plot ... need help ...
     wc.generate(text)
     plt.imshow(wc, interpolation='bilinear')
     plt.axis("off")
@@ -198,3 +219,116 @@ def plot_word_cloud():
 
 
 # TODO: word2vec unigram and bigram t_SNE
+def plot_unigram_emb(top_k=150):
+    """
+    plot unigram word embeddings in 2D spaces 
+    :param top_k: plot on the top_k words only 
+    """
+    # read 
+    full_tokens = load_full_preprocessed_tokens()
+    unigrams = [str(x).split() for x in full_tokens['review'].to_numpy()]
+
+    # word2vec
+    model = Word2Vec(
+        sentences=unigrams,
+        vector_size=100,
+        window=5, 
+        min_count=1,
+        workers=MAX_WORKERS
+    )
+    model.save(os.path.join(SAVE_MODEL_PATH, 'unigram_w2v.model'))
+
+    # count unigrams
+    unigram_count = defaultdict(int)
+    for unigram_list in unigrams:
+        for unigram in unigram_list:
+            unigram_count[str(unigram)] += 1
+    unigram_count_list = list(unigram_count.items())
+    unigram_count_list.sort(key=lambda x: -x[1])  # descending on occurrences 
+    top_unigrams = [x[0] for x in unigram_count_list[:top_k]]
+    top_unigrams_emb = model.wv[top_unigrams]
+
+    # plot 
+    embeddings_transformed = TSNE(
+        n_components=2,
+        learning_rate='auto', 
+        init='random'
+    ).fit_transform(top_unigrams_emb)
+
+    # visualize 
+    x = embeddings_transformed[:, 0]
+    y = embeddings_transformed[:, 1]
+    plt.figure(figsize=(20, 10))
+    colors = list(range(len(x)))
+    random.shuffle(colors)
+    plt.scatter(
+        x=x, 
+        y=y, 
+        c=colors, # a lazy way of assigning different colors
+        s=100,
+        cmap='Set2'
+    )
+    for i, unigram in enumerate(top_unigrams):
+        plt.annotate(unigram, (x[i], y[i]), xytext=(x[i]-0.2, y[i]+0.2), fontsize=8)
+    plt.title('Word2Vec Embeddings for Drug Reviews (Unigram)')
+    
+    # save 
+    plt.savefig(os.path.join(SAVE_IMAGE_PATH, 'unigram_w2v.png'), dpi=300)
+
+
+def plot_bigram_emb(top_k=100):
+    """ bigram version of wv """
+    # read and populate bigrams 
+    full_tokens = load_full_preprocessed_tokens()['review'].to_numpy()
+    bigrams = []
+    for review in full_tokens:
+        grams = str(review).split()
+        if len(grams) <= 1: continue 
+        bigrams.append(list(zip(grams[:-1], grams[1:])))
+
+    # word2vec
+    model = Word2Vec(
+        sentences=bigrams,
+        vector_size=100,
+        window=5,
+        min_count=1,
+        workers=MAX_WORKERS
+    )
+    model.save(os.path.join(SAVE_MODEL_PATH, 'bigram_w2v.model'))
+
+    # count unigrams
+    bigram_count = defaultdict(int)
+    for bigram_list in bigrams:
+        for bigram in bigram_list:
+            bigram_count[bigram] += 1
+    bigram_count_list = list(bigram_count.items())
+    bigram_count_list.sort(key=lambda x: -x[1])  # descending on occurrences
+    top_bigrams = [x[0] for x in bigram_count_list[:top_k]]
+    top_bigrams_emb = model.wv[top_bigrams]
+
+    # plot
+    embeddings_transformed = TSNE(
+        n_components=2,
+        learning_rate='auto',
+        init='random'
+    ).fit_transform(top_bigrams_emb)
+
+    # visualize
+    x = embeddings_transformed[:, 0]
+    y = embeddings_transformed[:, 1]
+    plt.figure(figsize=(20, 10))
+    colors = list(range(len(x)))
+    random.shuffle(colors)
+    plt.scatter(
+        x=x,
+        y=y,
+        c=colors,  # a lazy way of assigning different colors
+        s=100,
+        cmap='Set2'
+    )
+    for i, bigram in enumerate(top_bigrams):
+        plt.annotate(bigram, (x[i], y[i]), xytext=(x[i]-0.2, y[i]+0.2), fontsize=8)
+    plt.title('Word2Vec Embeddings for Drug Reviews (Bigram)')
+
+    # save
+    plt.savefig(os.path.join(SAVE_IMAGE_PATH, 'bigram_w2v.png'), dpi=300)
