@@ -174,6 +174,14 @@ def plot_useful_counts_groupby_rating(df: pd.DataFrame):
     # save 
     plt.savefig(os.path.join(SAVE_IMAGE_PATH, 'useful_counts_groupby_rating.png'), dpi=300)
 
+# TODO: 
+def plot_useful_counts_ts(df: pd.DataFrame):
+    """ 
+    plot useful counts as a time series 
+    :param df: the full dataframe 
+    """
+    pass 
+
 # ============================================
 # ------ plots on preprocessed data ----------
 # ============================================
@@ -218,7 +226,6 @@ def plot_word_cloud():
     plt.savefig(os.path.join(SAVE_IMAGE_PATH, 'review_word_cloud.png'), dpi=1000)
 
 
-# TODO: word2vec unigram and bigram t_SNE
 def plot_unigram_emb(top_k=150):
     """
     plot unigram word embeddings in 2D spaces 

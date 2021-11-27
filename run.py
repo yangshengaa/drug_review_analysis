@@ -10,13 +10,14 @@ test: ...
 import os 
 import sys 
 import numpy as np
-from numpy.lib.npyio import load
 import pandas as pd
 
-# load files 
+# load files (EXPLICIT PASSING TO PREVENT LOADING TOO MANY STUFFS!)
+
 # data 
 from src.data.data_downloader import download_drug_reviews
 from src.data.data_loader import load_data, partition_data
+
 # eda 
 from src.eda.visualize import (
     plot_basic_stats, 
@@ -29,10 +30,20 @@ from src.eda.visualize import (
     plot_bigram_emb,
 
 )
+
 # preprocessing 
 from src.preprocess.construct_features import (
-    tokenize_reviews
+    tokenize_reviews,
+    get_review_sentimens,
+    get_review_bow,
+    get_review_tf_idf,
+    get_condition_ohe,
+    get_drug_name_ohe,
+    construct_X,
+    construct_y,
+
 )
+
 # models 
 
 # ==================
@@ -68,7 +79,7 @@ def main(targets):
 
         # plots on preprocessed data
         # plot_word_cloud()
-        # plot_unigram_emb()
+        plot_unigram_emb()
         plot_bigram_emb()
         print('EDA Complete')
 
@@ -76,9 +87,21 @@ def main(targets):
         print('Preprocessing ...')
         train_df = load_data(train=True, dev=False)
         test_df = load_data(train=False, dev=False)
-        # tokenize_reviews(train_df)
+        # on original datasets 
+        # tokenize_reviews(train_df, train=True)
         # tokenize_reviews(test_df, train=False)
-        
+        # get_review_sentimens(train_df, train=True)
+        # get_review_sentimens(test_df, train=False)
+        # get_condition_ohe(train_df, test_df)
+        # get_drug_name_ohe(train_df, test_df)
+
+        # on preprocessed tokens 
+        # get_review_bow()
+        # get_review_tf_idf()
+
+        # concat all 
+        construct_X(train_df, test_df)
+        construct_y(train_df, test_df)
         print('Preprocessing Complete')
 
 if __name__ == '__main__':
