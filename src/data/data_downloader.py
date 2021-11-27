@@ -4,8 +4,8 @@ Download data from source, store it to data/raw
 
 # load packages 
 import os 
-import urllib
 import zipfile
+import urllib.request
 
 # specify path 
 RAW_DATA_PATH = 'data/raw'

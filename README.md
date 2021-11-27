@@ -43,7 +43,8 @@ Here is the place for developers to jot down ideas. Feel free to populate.
 
 The following plots need to be generated:
 
-- count of conditions
+- basic stats
+- count of conditions/ratings
 - violin plot of useful count for different ratings
 - useful count by conditions
 - t-SNE of unigram, bigram
