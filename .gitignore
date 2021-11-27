@@ -7,6 +7,9 @@ __pycache__/
 # data
 data/*
 !data/.gitkeep
+!data/dev/.gitkeep
+!data/raw/.gitkeep
+!data/preprocessed/.gitkeep
 saved_models/*
 !saved_models/.gitkeep
 images/*
