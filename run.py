@@ -48,7 +48,11 @@ from src.preprocess.construct_features import (
 )
 
 # models
-from src.models.train_test_models import load_train_test, train_test_all_models
+from src.models.train_test_models import (
+    load_train_test, 
+    train_test_all_models, 
+    prediction_mean_rank_correlation
+)
 
 # ==================
 # ----- main -------
