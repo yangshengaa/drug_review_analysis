@@ -110,10 +110,10 @@ def main(targets):
         # plot_condition_distribution(full_df)
         # plot_useful_counts_groupby_condition(full_df)
         # plot_useful_counts_groupby_rating(full_df)
-        plot_rating_useful_counts_ts(full_df)
+        # plot_rating_useful_counts_ts(full_df)
 
         # # plots on preprocessed data
-        # plot_word_cloud()
+        plot_word_cloud()
         # plot_unigram_emb()
         # plot_bigram_emb()
         print('EDA Complete')
