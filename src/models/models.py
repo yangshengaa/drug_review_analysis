@@ -24,9 +24,11 @@ import os
 import pickle 
 import numpy as np
 import pandas as pd 
+from datetime import datetime
 
 from sklearn.linear_model import Ridge, Lasso
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
 
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
@@ -90,9 +92,19 @@ class Regressor():
     
     def test(self):
         """ testing process """
-        predictions = self.predict(self.test_X)
-        # TODO: report and log metrics 
-        raise NotImplementedError()
+        # predict 
+        train_predictions = self.model.predict(self.train_X)
+        test_predictions = self.model.predict(self.test_X)
+        train_mse = mean_squared_error(self.train_y, train_predictions)
+        test_mse = mean_squared_error(self.test_y, test_predictions)
+        # log 
+        with open(os.path.join(SAVE_MODEL_PATH, 'results.txt'), 'a') as f:
+            f.write('{} {} {} {}\n'.format(
+                self.model_full_name,
+                train_mse,
+                test_mse, 
+                datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            ))
 
     # -------- auxciliary -----------
     def parse_parameters_to_str(self, kwargs: dict):

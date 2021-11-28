@@ -30,7 +30,7 @@ from nltk.stem.snowball import SnowballStemmer as stemmer
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, QuantileTransformer
 
 # function local pointer (speed hack)
 STOPWORDS = set(stopwords.words('english'))
@@ -56,12 +56,11 @@ def remove_meaningless_rows(train_df: pd.DataFrame, test_df: pd.DataFrame):
       the number of useful counts. Let's discard these samples (1171 in total)
     """
     # subset 
-    train_df = train_df.loc[train_df['condition'].astype(str).str.contains('</span>')]
-    test_df = test_df.loc[test_df['condition'].astype(str).str.contains('</span>')]
+    train_df = train_df.loc[~ train_df['condition'].astype(str).str.contains('</span>')]
+    test_df = test_df.loc[~ test_df['condition'].astype(str).str.contains('</span>')]
     # save 
     train_df.to_csv(os.path.join(SAVE_FEAT_PATH, 'drugsComTrain_selected_raw.tsv'), sep='\t')
-    # TODO: 
-
+    test_df.to_csv(os.path.join(SAVE_FEAT_PATH, 'drugsComTest_selected_raw.tsv'), sep='\t')
 
 
 # ======================
@@ -149,6 +148,11 @@ def get_review_tf_idf():
     train_reviews_tf_idf = tf_idf_model.transform(train_reviews)
     test_reviews_tf_idf = tf_idf_model.transform(test_reviews)
 
+    # extract sementics 
+    terms = tf_idf_model.get_feature_names_out()
+    with open(os.path.join(SAVE_FEAT_PATH, 'reviews_tf_idf_terms.npy'), 'wb') as f:
+        np.save(f, terms)
+
     # save 
     sparse.save_npz(os.path.join(SAVE_FEAT_PATH, 'reviews_tf_idf_train.npz'), train_reviews_tf_idf)
     sparse.save_npz(os.path.join(SAVE_FEAT_PATH, 'reviews_tf_idf_test.npz'), test_reviews_tf_idf)
@@ -169,6 +173,11 @@ def get_review_bow():
     count_vec_model = CountVectorizer(ngram_range=(1, 2)).fit(train_reviews)
     train_reviews_bow = count_vec_model.transform(train_reviews)
     test_reviews_bow = count_vec_model.transform(test_reviews)
+
+    # extract sementics 
+    terms = count_vec_model.get_feature_names_out()
+    with open(os.path.join(SAVE_FEAT_PATH, 'reviews_bow_terms.npy'), 'wb') as f:
+        np.save(f, terms)
 
     # save 
     sparse.save_npz(os.path.join(SAVE_FEAT_PATH, 'reviews_bow_train.npz'), train_reviews_bow)
@@ -191,6 +200,11 @@ def get_drug_name_ohe(train_df: pd.DataFrame, test_df: pd.DataFrame):
     train_drug_names_ohe = ohe.transform(train_drug_names)
     test_drug_names_ohe = ohe.transform(test_drug_names)
 
+    # extract sementics 
+    terms = ohe.get_feature_names_out()
+    with open(os.path.join(SAVE_FEAT_PATH, 'drug_names_ohe_terms.npy'), 'wb') as f:
+        np.save(f, terms)
+
     # save
     sparse.save_npz(os.path.join(SAVE_FEAT_PATH, 'drug_names_ohe_train.npz'), train_drug_names_ohe)
     sparse.save_npz(os.path.join(SAVE_FEAT_PATH, 'drug_names_ohe_test.npz'), test_drug_names_ohe)
@@ -212,6 +226,11 @@ def get_condition_ohe(train_df: pd.DataFrame, test_df: pd.DataFrame):
     train_conditions_ohe = ohe.transform(train_conditions)
     test_conditions_ohe = ohe.transform(test_conditions)
 
+    # extract sementics 
+    terms = ohe.get_feature_names_out()
+    with open(os.path.join(SAVE_FEAT_PATH, 'conditions_ohe_terms.npy'), 'wb') as f:
+        np.save(f, terms)
+    
     # save 
     sparse.save_npz(os.path.join(SAVE_FEAT_PATH, 'conditions_ohe_train.npz'), train_conditions_ohe)
     sparse.save_npz(os.path.join(SAVE_FEAT_PATH, 'conditions_ohe_test.npz'), test_conditions_ohe)
@@ -256,16 +275,41 @@ def construct_X(train_df: pd.DataFrame, test_df: pd.DataFrame):
     sparse.save_npz(os.path.join(SAVE_FEAT_PATH, 'train_X.npz'), train_X)
     sparse.save_npz(os.path.join(SAVE_FEAT_PATH, 'test_X.npz'), test_X)
 
+    # sementics (column names, in the correct order)
+    drug_names_terms = np.load(os.path.join(SAVE_FEAT_PATH, 'drug_names_ohe_terms.npy'), allow_pickle=True)
+    condition_terms = np.load(os.path.join(SAVE_FEAT_PATH, 'conditions_ohe_terms.npy'), allow_pickle=True)
+    reviews_bow_terms = np.load(os.path.join(SAVE_FEAT_PATH, 'reviews_bow_terms.npy'), allow_pickle=True)
+    reviews_tf_idf_terms = np.load(os.path.join(SAVE_FEAT_PATH, 'reviews_tf_idf_terms.npy'), allow_pickle=True)
+    columns = (
+        list(drug_names_terms) 
+        + list(condition_terms) 
+        + list(reviews_bow_terms) 
+        + list(reviews_tf_idf_terms)
+        + ['neg', 'neu', 'pos', 'compound']
+        + ['rating']
+    )
+    # save 
+    pd.Series(columns).to_csv(os.path.join(SAVE_FEAT_PATH, 'column_names.csv'))
+
 
 # TODO: remove 0? Quantile transformation?
 def construct_y(train_df: pd.DataFrame, test_df: pd.DataFrame):
     """ appropriate processing of y values """
     # extract 
-    train_y = np.log(train_df['usefulCount'] + 1).to_numpy()
-    test_y = np.log(test_df['usefulCount'] + 1).to_numpy()
+    train_y = train_df[['usefulCount']]
+    test_y = test_df[['usefulCount']]
+
+    # quantile transformer 
+    # two benefits: 1. more interpretability; 2. normal more amenable to the MSE metric
+    qt = QuantileTransformer(
+        n_quantiles=10000,              # TODO: number of quantiles to be determined
+        output_distribution='normal'
+    ).fit(train_y)
+    train_y_transformed = qt.transform(train_y)
+    test_y_transformed = qt.transform(test_y)
+
     # save 
     with open(os.path.join(SAVE_FEAT_PATH, 'train_y.npy'), 'wb') as f:
-        np.save(f, train_y)
+        np.save(f, train_y_transformed)
     with open(os.path.join(SAVE_FEAT_PATH, 'test_y.npy'), 'wb') as f:
-        np.save(f, test_y)
-    
+        np.save(f, test_y_transformed)

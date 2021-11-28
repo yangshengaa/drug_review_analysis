@@ -174,13 +174,27 @@ def plot_useful_counts_groupby_rating(df: pd.DataFrame):
     # save 
     plt.savefig(os.path.join(SAVE_IMAGE_PATH, 'useful_counts_groupby_rating.png'), dpi=300)
 
-# TODO: 
-def plot_useful_counts_ts(df: pd.DataFrame):
+
+def plot_rating_useful_counts_ts(df: pd.DataFrame):
     """ 
     plot useful counts as a time series 
     :param df: the full dataframe 
     """
-    pass 
+    # resample by month
+    df_by_date = df[['date', 'rating', 'usefulCount']].set_index('date')
+    df_by_date.index = pd.to_datetime(df_by_date.index)
+    monthly_mean = df_by_date.resample('M').mean()
+    # plot 
+    plt.figure(figsize=(20, 10))
+    _, ax = plt.subplots()
+    ax.plot(monthly_mean.index, monthly_mean['rating'], color='tab:blue', label='mean rating')
+    ax.set_xlabel('month')
+    ax.set_ylabel('mean rating', color='tab:blue')
+    ax2 = ax.twinx()
+    ax2.plot(monthly_mean.index, monthly_mean['usefulCount'], color='tab:orange', label='mean useful count')
+    ax2.set_ylabel('mean useful count', color='tab:orange')
+    plt.title('Rating and Useful Counts by Month')
+    plt.savefig(os.path.join(SAVE_IMAGE_PATH, 'monthly_rating_useful_counts.png'), dpi=300)
 
 # ============================================
 # ------ plots on preprocessed data ----------

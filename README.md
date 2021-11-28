@@ -11,8 +11,10 @@ In this assignment, we use the drug review dataset to predict the useful counts 
 TODO: add more functionality
 
 Download data: ```python run.py download```  
-Partition data: ```python run.py partition``` (only after downloading)
-EDA (make plots): ```python run.py eda``` (only after downloading)
+Partition data: ```python run.py partition``` (only after downloading)  
+Construct Features ```python run.py preprocess``` (only after downloading)  
+EDA (make plots): ```python run.py eda``` (only after preprocess)  
+
 
 ## File Digestion
 
