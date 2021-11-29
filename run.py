@@ -51,7 +51,13 @@ from src.preprocess.construct_features import (
 from src.models.train_test_models import (
     load_train_test, 
     train_test_all_models, 
-    prediction_mean_rank_correlation
+    mse_by_rating,
+    prediction_mean_rank_correlation,
+    visualize_prediction_mean_rank_correlation,
+    top_k_features_linear_model,
+    top_k_features_bagging_model,
+    top_k_features_xgb,
+    top_k_features_lgbm,
 )
 
 # ==================
@@ -131,6 +137,45 @@ def main(targets):
         train_test_all_models(train_X, train_y, test_X, test_y)
         print('Training Complete')
         
+    if 'analyze' in targets:
+        print("Start Analyzing")
+        # read 
+        train_X, train_y, test_X, test_y = load_train_test()
+        test_df = load_data(train=False, selected=True, dev=False)
+
+        # pick best performing models 
+        lasso_model_name = '_LassoRegressor_alpha_0.0001'
+        ridge_model_name = '_RidgeRegressor_alpha_0.1'
+        rf_model_name = '_RFRegressor_n_estimators_100_max_depth_30_n_jobs_-1'
+        lgbm_model_name = '_LightGBMRegressor_n_estimators_5000_max_depth_30'
+        xgb_model_name = '_XGBoostRegressor_n_estimators_1500_max_depth_30_n_jobs_-1'
+
+        # extract top k features 
+        # top_k_features_linear_model(lasso_model_name)
+        # top_k_features_linear_model(ridge_model_name)
+        # top_k_features_bagging_model(rf_model_name)
+        # top_k_features_lgbm(lgbm_model_name)
+        # top_k_features_xgb(xgb_model_name)
+
+        # mse by parts 
+        # mse_by_rating(lasso_model_name, test_df, test_X, test_y)
+        # mse_by_rating(ridge_model_name, test_df, test_X, test_y)
+        # mse_by_rating(rf_model_name, test_df, test_X, test_y)
+        # mse_by_rating(lgbm_model_name, test_df, test_X, test_y)
+        # mse_by_rating(xgb_model_name, test_df, test_X, test_y)
+
+        # rank corr
+        # model_names = os.listdir('saved_models/')
+        # model_names = [model_name for model_name in model_names if '_alpha_' in model_name or 'max_depth' in model_name]
+        # model_names.remove('_RFRegressor_n_estimators_5_max_depth_10_n_jobs_-1')
+        # model_names.remove('_LightGBMRegressor_n_estimators_500_max_depth_10')
+
+        # for model_name in model_names:
+        #     prediction_mean_rank_correlation(model_name, test_df, test_X, test_y)
+
+        # visualize rank corr 
+        visualize_prediction_mean_rank_correlation()
+        print('Analysis Complete')
 
 if __name__ == '__main__':
     targets = sys.argv[1:]
