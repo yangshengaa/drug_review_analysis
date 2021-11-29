@@ -22,6 +22,7 @@ then the model saved will be named
 # load packages 
 import os 
 import pickle 
+import random
 import numpy as np
 import pandas as pd 
 from datetime import datetime
@@ -51,6 +52,7 @@ class Regressor():
             test_X, 
             test_y, 
             model_name='',
+            use_subset=False,
             **kwargs
         ):
         """ 
@@ -63,6 +65,7 @@ class Regressor():
         self.train_y = train_y
         self.test_X = test_X
         self.test_y = test_y
+        self.use_subset = use_subset
         self.parameters = kwargs
         # specify model type 
         self.model = None
@@ -88,7 +91,13 @@ class Regressor():
     # --------- train test ---------
     def train(self):
         """ training process """
-        self.model.fit(self.train_X, self.train_y)
+        if self.use_subset:
+            subset_idx = random.sample(range(self.train_X.shape[0]), 50000)
+            subset_train_X = self.train_X[subset_idx]
+            subset_train_y = self.train_y[subset_idx]
+            self.model.fit(subset_train_X, subset_train_y)
+        else:
+            self.model.fit(self.train_X, self.train_y)
     
     def test(self):
         """ testing process """
@@ -130,11 +139,13 @@ class RidgeRegressor(Regressor):
     def __init__(
         self, 
         train_X, train_y, test_X, test_y, 
+        use_subset=False,
         model_name='', 
         **kwargs
     ):
         super().__init__(
             train_X, train_y, test_X, test_y, 
+            use_subset=use_subset,
             model_name=model_name, 
             **kwargs
         )
@@ -145,11 +156,13 @@ class LassoRegressor(Regressor):
     def __init__(
         self,
         train_X, train_y, test_X, test_y,
+        use_subset=False,
         model_name='',
         **kwargs
     ):
         super().__init__(
             train_X, train_y, test_X, test_y,
+            use_subset=use_subset,
             model_name=model_name,
             **kwargs
         )
@@ -160,11 +173,13 @@ class RFRegressor(Regressor):
     def __init__(
         self,
         train_X, train_y, test_X, test_y,
+        use_subset=False,
         model_name='',
         **kwargs
     ):
         super().__init__(
             train_X, train_y, test_X, test_y,
+            use_subset=use_subset,
             model_name=model_name,
             **kwargs
         )
@@ -174,11 +189,13 @@ class XGBoostRegressor(Regressor):
     def __init__(
         self,
         train_X, train_y, test_X, test_y,
+        use_subset=False,
         model_name='',
         **kwargs
     ):
         super().__init__(
             train_X, train_y, test_X, test_y,
+            use_subset=use_subset,
             model_name=model_name,
             **kwargs
         )
@@ -188,11 +205,13 @@ class LightGBMRegressor(Regressor):
     def __init__(
         self,
         train_X, train_y, test_X, test_y,
+        use_subset=False,
         model_name='',
         **kwargs
     ):
         super().__init__(
             train_X, train_y, test_X, test_y,
+            use_subset=use_subset,
             model_name=model_name,
             **kwargs
         )

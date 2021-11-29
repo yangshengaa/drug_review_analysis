@@ -144,7 +144,10 @@ def get_review_tf_idf():
     test_reviews = test_reviews.to_numpy()
 
     # train 
-    tf_idf_model = TfidfVectorizer().fit(train_reviews)  # TODO: specify arguments for tf_idf
+    tf_idf_model = TfidfVectorizer(
+        ngram_range=(1, 2),
+        max_features=30000
+    ).fit(train_reviews)  # TODO: specify arguments for tf_idf
     train_reviews_tf_idf = tf_idf_model.transform(train_reviews)
     test_reviews_tf_idf = tf_idf_model.transform(test_reviews)
 
@@ -170,7 +173,10 @@ def get_review_bow():
     test_reviews = test_reviews.to_numpy()
 
     # train 
-    count_vec_model = CountVectorizer(ngram_range=(1, 2)).fit(train_reviews)
+    count_vec_model = CountVectorizer(
+        ngram_range=(1, 2),
+        max_features=30000
+    ).fit(train_reviews)
     train_reviews_bow = count_vec_model.transform(train_reviews)
     test_reviews_bow = count_vec_model.transform(test_reviews)
 

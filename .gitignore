@@ -15,5 +15,7 @@ data/preprocessed/*
 saved_models/*
 !saved_models/.gitkeep
 !saved_models/results.txt
+!saved_models/mse_by_rating.txt
+!saved_models/rank_corr.txt
 images/*
 !images/.gitkeep
