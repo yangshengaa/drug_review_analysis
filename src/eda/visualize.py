@@ -108,7 +108,7 @@ def plot_condition_distribution(df: pd.DataFrame):
         rot=45,
         ylabel='count',
         fontsize=5,
-        figsize=(10, 5)
+        figsize=(8, 4)
     ).get_figure()
     fig.tight_layout()
     fig.savefig(os.path.join(SAVE_IMAGE_PATH, 'condition_dist.png'), dpi=300)
@@ -130,7 +130,7 @@ def plot_useful_counts_groupby_condition(df: pd.DataFrame):
             ax=ax,
             kind='kde',
             xlim=[-5, 200],
-            figsize=(12, 6)
+            figsize=(8, 4)
         )
     plt.legend(top_conditions, fontsize=8)
     plt.xlabel('useful counts')
@@ -154,7 +154,7 @@ def plot_useful_counts_groupby_rating(df: pd.DataFrame):
     z = groupby_df['size'].rename('total_counts')
 
     # plot 
-    plt.figure(figsize=(14, 7))
+    plt.figure(figsize=(8, 4))
     plt.scatter(
         x, y, c=z, s=150, 
         cmap='magma'       # TODO: I think magma is good enough. But anyone wants a better colormap?

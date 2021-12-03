@@ -1,20 +1,22 @@
 # Assignment 2: Drug Review Dataset Analysis
 
-In this assignment, we use the drug review dataset to predict the useful counts of a given review.
+In this assignment, we use the drug review dataset to predict the useful counts of a given review, and propose a new metric (rank correlation) to evaluate the effectiveness of the prediction. We empirically verified that tuning MSE indeed improves performance measured by the new and more realistic metric. 
 
 <p align="center">
-  <img src="images/review_word_cloud.png" width="350" title="Word Cloud of Drug Reviews">
+  <img src="images/rank_corr_mse.png" title="Word Cloud of Drug Reviews">
+</p>
+<p align="center">
+    <em>Test MSE and Equally Weighted Rank Correlation </em>
 </p>
 
-## Quick Start
 
-TODO: add more functionality
+## Quick Start
 
 Download data: ```python run.py download```  
 Partition data: ```python run.py partition``` (only after downloading)  
 Construct Features ```python run.py preprocess``` (only after downloading)  
 EDA (make plots): ```python run.py eda``` (only after preprocess)  
-
+Train (train and test models): ```python run.py train``` (only after preprocess)
 
 ## File Digestion
 
@@ -45,44 +47,19 @@ This project contains the following four folders
 
 ## Citation
 
-TODO: add more
-
-One thing worth mentioning is that most research are done on predicting variables other than useful counts (ratings, conditions, etc). We are, in this sense, in deed groundbreaking! (jk).
-
 data source: <https://archive-beta.ics.uci.edu/ml/datasets/drug+review+dataset+drugs+com>  
 
 related tutorials: <https://medium.com/sfu-cspmp/draw-drug-review-analysis-work-96212ed98941>
 
 related papers: <https://www.sciencedirect.com/science/article/pii/S1665642317300561#bib0105>
 
-## For Developer
+## For Developer 
 
-Here is the place for developers to jot down ideas. Feel free to populate.
+Details are written in files.
 
-### EDA
-
-The following plots need to be generated:
-
-- basic stats
-- count of conditions/ratings
-- violin plot of useful count for different ratings
-- useful count by conditions
-- t-SNE of unigram, bigram
-
-### Features
-
-The following features may be helpful
-
-- TF-IDF (after removing stemmers and stop words)
-- Sentiment scores (NLTK pretrained)
-- condition OHE
-- date?
-
-Make sure to serialize model after training!
-
-### Interpretability
-
-The following needs to be examined:
-
-- suspect a lower MSE for higher ratings: well-known phenomenon among patients, who like to look for similar patients, and patients who give abnormally low ratings probably encountered some unrelatable circumstances.
-- SHAP values for feature analysis
+<p align="center">
+  <img src="images/review_word_cloud.png"  title="Word Cloud of Drug Reviews">
+</p>
+<p align="center">
+    <em>Review Wordcloud</em>
+</p>
